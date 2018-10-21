@@ -1,0 +1,12 @@
+﻿{
+  "imageH": 25,
+  "imageW": 25,
+  "train1": {
+    "symbol": "!",
+    "value": 0
+  },
+  "train2": {
+    "symbol": "+",
+    "value": "1"
+  }
+}
