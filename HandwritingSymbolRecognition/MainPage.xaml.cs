@@ -1,7 +1,9 @@
-﻿using Microsoft.Graphics.Canvas;
+﻿using HandwritingSymbolRecognition.Helpers;
+using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
