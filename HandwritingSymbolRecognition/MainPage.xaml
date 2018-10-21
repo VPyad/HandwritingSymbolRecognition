@@ -3,12 +3,29 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:HandwritingSymbolRecognition"
+    xmlns:canvas="using:Microsoft.Graphics.Canvas.UI.Xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-    <Grid>
+    <Page.TopAppBar>
+        <AppBar IsSticky="True" IsOpen="True">
+            <StackPanel Orientation="Horizontal">
+                <AppBarButton Label="Train" Icon="Accept" />
+                <AppBarButton Label="Recognize" Icon="Globe" />
+                <AppBarSeparator/>
+                <AppBarButton Label="Clear" Icon="Clear" Click="OnClear" />
+                <AppBarSeparator/>
+                <AppBarButton Label="Settings" Icon="Setting"/>
+            </StackPanel>
+        </AppBar>
+    </Page.TopAppBar>
 
+    <Grid>
+        <canvas:CanvasControl Draw="DrawCanvas" ClearColor="Beige" x:Name="drawingCanvas"/>
+        <InkCanvas x:Name="inkCanvas"/>
+        <InkToolbar TargetInkCanvas="{x:Bind inkCanvas}"
+             VerticalAlignment="Bottom" x:Name="inkToolbar"/>
     </Grid>
 </Page>
