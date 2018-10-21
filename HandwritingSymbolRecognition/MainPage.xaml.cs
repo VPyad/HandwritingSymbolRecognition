@@ -26,5 +26,15 @@ namespace HandwritingSymbolRecognition
         {
             this.InitializeComponent();
         }
+
+        private void DrawCanvas(Microsoft.Graphics.Canvas.UI.Xaml.CanvasControl sender, Microsoft.Graphics.Canvas.UI.Xaml.CanvasDrawEventArgs args)
+        {
+
+        }
+
+        private void OnClear(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }
