@@ -14,16 +14,22 @@
     
     <Grid>
         <StackPanel Orientation="Vertical">
-            <StackPanel Orientation="Horizontal" Margin="10,10,10,0">
-                <TextBlock Text="Train set for:" VerticalAlignment="Center" Style="{StaticResource SubtitleTextBlockStyle}"/>
-                <TextBlock x:Name="symbol1TextBlock" Text="!" FontWeight="Bold" TextAlignment="Center" Width="30" Style="{StaticResource TitleTextBlockStyle}"/>
-                <Button x:Name="symbol1Button" Click="OnSymbol1ButtonClicked" Content="Browse" Margin="15,0,0,0"/>
+            <StackPanel Orientation="Vertical" Margin="10,10,10,0">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Train set for:" VerticalAlignment="Center" Style="{StaticResource SubtitleTextBlockStyle}"/>
+                    <TextBlock x:Name="symbol1TextBlock" Text="!" FontWeight="Bold" TextAlignment="Center" Width="30" Style="{StaticResource TitleTextBlockStyle}"/>
+                    <Button x:Name="symbol1Button" Click="OnSymbol1ButtonClicked" Content="Browse" Margin="15,0,0,0"/>
+                </StackPanel>
+                <TextBlock x:Name="symbol1ResultPickerTextBlock" Text="Files selected: 20" Margin="0,5,0,0" Style="{StaticResource CaptionTextBlockStyle}" Visibility="Collapsed" Foreground="Green"/>
             </StackPanel>
 
-            <StackPanel Orientation="Horizontal" Margin="10,10,10,0">
-                <TextBlock Text="Train set for:" VerticalAlignment="Center" Style="{StaticResource SubtitleTextBlockStyle}"/>
-                <TextBlock x:Name="symbol2TextBlock" Text="+" FontWeight="Bold" TextAlignment="Center" Width="30" Style="{StaticResource TitleTextBlockStyle}"/>
-                <Button x:Name="symbol2Button" Click="OnSymbol2ButtonClicked" Content="Browse" Margin="15,0,0,0"/>
+            <StackPanel Orientation="Vertical" Margin="10,10,10,0">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Train set for:" VerticalAlignment="Center" Style="{StaticResource SubtitleTextBlockStyle}"/>
+                    <TextBlock x:Name="symbol2TextBlock" Text="+" FontWeight="Bold" TextAlignment="Center" Width="30" Style="{StaticResource TitleTextBlockStyle}"/>
+                    <Button x:Name="symbol2Button" Click="OnSymbol2ButtonClicked" Content="Browse" Margin="15,0,0,0"/>
+                </StackPanel>
+                <TextBlock x:Name="symbol2ResultPickerTextBlock" Text="Files selected: 20" Margin="0,5,0,0" Style="{StaticResource CaptionTextBlockStyle}" Visibility="Collapsed" Foreground="Green"/>
             </StackPanel>
 
             <StackPanel Orientation="Vertical" Margin="10,5,10,0">

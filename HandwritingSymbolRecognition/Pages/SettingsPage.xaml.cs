@@ -2,11 +2,16 @@
 using HandwritingSymbolRecognition.Models.TrainingSet;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.Storage;
+using Windows.Storage.Pickers;
+using Windows.UI;
 using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -25,6 +30,11 @@ namespace HandwritingSymbolRecognition.Pages
     /// </summary>
     public sealed partial class SettingsPage : Page
     {
+        private const string FILES_RESULT_PICKER_SUCCESS_TEXT = "Files selected: ";
+        private const string FILES_RESULT_PICKER_FAILED_TEXT = "Containing folder is empty or has no images";
+
+        
+
         public SettingsPage()
         {
             this.InitializeComponent();
@@ -65,14 +75,22 @@ namespace HandwritingSymbolRecognition.Pages
                 Frame.Navigate(typeof(MainPage));
         }
 
-        private void OnSymbol1ButtonClicked(object sender, RoutedEventArgs e)
+        private async void OnSymbol1ButtonClicked(object sender, RoutedEventArgs e)
         {
+            var files = await ShowFolderPickerAsync();
 
+            if (files == null)
+            {
+                DecorateResultPickerTextBlock(symbol1ResultPickerTextBlock, false);
+                return;
+            }
+
+            DecorateResultPickerTextBlock(symbol1ResultPickerTextBlock, true, files.Count());
         }
 
-        private void OnSymbol2ButtonClicked(object sender, RoutedEventArgs e)
+        private async void OnSymbol2ButtonClicked(object sender, RoutedEventArgs e)
         {
-
+            var files = await ShowFolderPickerAsync();
         }
 
         private void OnTrainButtonClicked(object sender, RoutedEventArgs e)
@@ -83,6 +101,48 @@ namespace HandwritingSymbolRecognition.Pages
         private void OnDeleteModelButtonClicked(object sender, RoutedEventArgs e)
         {
 
+        }
+        #endregion
+
+        #region Helpers
+        private async Task<IEnumerable<StorageFile>> ShowFolderPickerAsync()
+        {
+            FolderPicker picker = new FolderPicker();
+
+            picker.SuggestedStartLocation = PickerLocationId.Desktop;
+            picker.FileTypeFilter.Add(".png");
+            picker.FileTypeFilter.Add(".jpg");
+            picker.ViewMode = PickerViewMode.Thumbnail;
+
+            var folder = await picker.PickSingleFolderAsync();
+
+            if (folder == null)
+                return null;
+
+            var files = await folder.GetFilesAsync();
+            var images = files.Where(x => x.FileType == ".jpg" || x.FileType == ".png");
+
+            if (images == null || images.Count() == 0)
+                return null;
+            else
+                return images;
+        }
+
+        private void DecorateResultPickerTextBlock(TextBlock targetTextBlock, bool success, int? filesCount = null)
+        {
+            if (success)
+            {
+                string count = filesCount.HasValue ? filesCount.Value.ToString() : "null";
+                targetTextBlock.Text = $"{FILES_RESULT_PICKER_SUCCESS_TEXT} {count}";
+                targetTextBlock.Foreground = new SolidColorBrush(Colors.Green);
+            }
+            else
+            {
+                targetTextBlock.Text = FILES_RESULT_PICKER_FAILED_TEXT;
+                targetTextBlock.Foreground = new SolidColorBrush(Colors.Red);
+            }
+
+            targetTextBlock.Visibility = Visibility.Visible;
         }
         #endregion
     }
