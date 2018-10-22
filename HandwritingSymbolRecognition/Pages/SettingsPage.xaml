@@ -15,17 +15,37 @@
     <Grid>
         <StackPanel Orientation="Vertical">
             <StackPanel Orientation="Horizontal" Margin="10,10,10,0">
-                <TextBlock FontSize="25">
-                    Train set for: <Bold>!</Bold>
-                </TextBlock>
-                <Button Content="Browse" Margin="25,0,0,0"/>
-                
-            </StackPanel>
-            <StackPanel Orientation="Horizontal" Margin="10,10,10,0">
-                <TextBlock FontSize="25">
-                    Train set for: <Bold>+</Bold>
-                </TextBlock>
+                <TextBlock Text="Train set for:" VerticalAlignment="Center" Style="{StaticResource SubtitleTextBlockStyle}"/>
+                <TextBlock Text="!" FontWeight="Bold" TextAlignment="Center" Width="30" Style="{StaticResource TitleTextBlockStyle}"/>
                 <Button Content="Browse" Margin="15,0,0,0"/>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" Margin="10,10,10,0">
+                <TextBlock Text="Train set for:" VerticalAlignment="Center" Style="{StaticResource SubtitleTextBlockStyle}"/>
+                <TextBlock Text="+" FontWeight="Bold" TextAlignment="Center" Width="30" Style="{StaticResource TitleTextBlockStyle}"/>
+                <Button Content="Browse" Margin="15,0,0,0"/>
+            </StackPanel>
+
+            <StackPanel Orientation="Vertical" Margin="10,5,10,0">
+                <TextBlock Text="Choose folder with image set for one or both symbols" Style="{StaticResource CaptionTextBlockStyle}"/>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="each image should be" Style="{StaticResource CaptionTextBlockStyle}"/>
+                    <TextBlock Text=" 25" Style="{StaticResource CaptionTextBlockStyle}" FontWeight="Medium"/>
+                    <TextBlock Text=" x" Style="{StaticResource CaptionTextBlockStyle}"/>
+                    <TextBlock Text=" 25" Style="{StaticResource CaptionTextBlockStyle}" FontWeight="Medium"/>
+                    <TextBlock Text=" Click 'Train' button to start" Style="{StaticResource CaptionTextBlockStyle}"/>
+                </StackPanel>
+            </StackPanel>
+
+            <StackPanel Orientation="Vertical" Margin="10,10,10,0">
+                <StackPanel Orientation="Horizontal">
+                    <Button Content="Train" Width="125"/>
+                    <TextBlock Padding="5,0,0,0" Text="Starts train" TextAlignment="Center" VerticalAlignment="Center" Style="{StaticResource CaptionTextBlockStyle}"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                    <Button Content="Delete model" Width="125"/>
+                    <TextBlock Padding="5,0,0,0" Text="Deletes saved model" TextAlignment="Center" VerticalAlignment="Center" Style="{StaticResource CaptionTextBlockStyle}"/>
+                </StackPanel>
             </StackPanel>
         </StackPanel>
     </Grid>

@@ -1,4 +1,5 @@
 ﻿using HandwritingSymbolRecognition.Helpers;
+using HandwritingSymbolRecognition.Pages;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using System;
@@ -39,6 +40,7 @@ namespace HandwritingSymbolRecognition
         {
             InitializeComponent();
 
+            NavigationCacheMode = Windows.UI.Xaml.Navigation.NavigationCacheMode.Enabled;
             strokes = new List<InkStrokeContainer>();
 
             Loaded += OnLoaded;
@@ -104,6 +106,12 @@ namespace HandwritingSymbolRecognition
         {
             ClearCanvas();
         }
+
+        private void OnSettingsButtonClicked(object sender, RoutedEventArgs e)
+        {
+            Frame.Navigate(typeof(SettingsPage));
+        }
+
         #endregion
 
         #region Methods
