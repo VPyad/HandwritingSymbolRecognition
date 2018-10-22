@@ -40,7 +40,6 @@ namespace HandwritingSymbolRecognition
         {
             InitializeComponent();
 
-            NavigationCacheMode = Windows.UI.Xaml.Navigation.NavigationCacheMode.Enabled;
             strokes = new List<InkStrokeContainer>();
 
             Loaded += OnLoaded;

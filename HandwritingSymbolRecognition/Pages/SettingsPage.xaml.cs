@@ -1,4 +1,6 @@
-﻿using System;
+﻿using HandwritingSymbolRecognition.Helpers;
+using HandwritingSymbolRecognition.Models.TrainingSet;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -26,6 +28,20 @@ namespace HandwritingSymbolRecognition.Pages
         public SettingsPage()
         {
             this.InitializeComponent();
+
+            Loaded += SettingsPage_Loaded;
+        }
+
+        #region Event and overrides
+        private async void SettingsPage_Loaded(object sender, RoutedEventArgs e)
+        {
+            TrainSetConfig config = await TrainSetConfigHelper.ParseConfigJson();
+
+            symbol1TextBlock.Text = config.Train1.Symbol;
+            symbol2TextBlock.Text = config.Train2.Symbol;
+
+            imageHTextBlock.Text = $" {config.ImageHeight.ToString()}";
+            imageWTextBlock.Text = $" {config.ImageWidth.ToString()}";
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
@@ -48,5 +64,26 @@ namespace HandwritingSymbolRecognition.Pages
             else
                 Frame.Navigate(typeof(MainPage));
         }
+
+        private void OnSymbol1ButtonClicked(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void OnSymbol2ButtonClicked(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void OnTrainButtonClicked(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void OnDeleteModelButtonClicked(object sender, RoutedEventArgs e)
+        {
+
+        }
+        #endregion
     }
 }
