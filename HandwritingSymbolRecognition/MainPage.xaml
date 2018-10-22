@@ -17,7 +17,7 @@
                 <AppBarSeparator/>
                 <AppBarButton Label="Clear" Icon="Clear" Click="OnClear" />
                 <AppBarSeparator/>
-                <AppBarButton Label="Settings" Icon="Setting"/>
+                <AppBarButton Label="Settings" Icon="Setting" Click="OnSettingsButtonClicked"/>
             </StackPanel>
         </AppBar>
     </Page.TopAppBar>

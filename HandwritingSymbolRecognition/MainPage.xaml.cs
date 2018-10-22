@@ -1,4 +1,5 @@
 ﻿using HandwritingSymbolRecognition.Helpers;
+using HandwritingSymbolRecognition.Pages;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using System;
@@ -104,6 +105,12 @@ namespace HandwritingSymbolRecognition
         {
             ClearCanvas();
         }
+
+        private void OnSettingsButtonClicked(object sender, RoutedEventArgs e)
+        {
+            Frame.Navigate(typeof(SettingsPage));
+        }
+
         #endregion
 
         #region Methods
