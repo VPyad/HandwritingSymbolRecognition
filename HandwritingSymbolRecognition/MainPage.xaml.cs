@@ -1,5 +1,6 @@
 ﻿using HandwritingSymbolRecognition.Helpers;
 using HandwritingSymbolRecognition.Pages;
+using HandwritingSymbolRecognition.Services;
 using Microsoft.Graphics.Canvas;
 using Microsoft.Graphics.Canvas.UI.Xaml;
 using System;
@@ -10,6 +11,7 @@ using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.Storage.Streams;
 using Windows.UI.Input.Inking;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -32,6 +34,7 @@ namespace HandwritingSymbolRecognition
         private readonly List<InkStrokeContainer> strokes;
         private InkSynchronizer inkSynchronizer;
         private IReadOnlyList<InkStroke> pendingDry;
+        private InkPresenter inkPresenter;
 
         private int deferredDryDelay;
         #endregion
@@ -48,7 +51,8 @@ namespace HandwritingSymbolRecognition
         #region Events
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
-            var inkPresenter = inkCanvas.InkPresenter;
+            //var inkPresenter = inkCanvas.InkPresenter;
+            inkPresenter = inkCanvas.InkPresenter;
 
             inkSynchronizer = inkPresenter.ActivateCustomDrying();
             inkPresenter.InputDeviceTypes = Windows.UI.Core.CoreInputDeviceTypes.Mouse | Windows.UI.Core.CoreInputDeviceTypes.Pen | Windows.UI.Core.CoreInputDeviceTypes.Touch;
@@ -109,6 +113,15 @@ namespace HandwritingSymbolRecognition
         private void OnSettingsButtonClicked(object sender, RoutedEventArgs e)
         {
             Frame.Navigate(typeof(SettingsPage));
+        }
+
+        private async void OnRecognizedButtonClicked(object sender, RoutedEventArgs e)
+        {
+            InMemoryRandomAccessStream stream = new InMemoryRandomAccessStream();
+            ImageProcessor imageProcessor = new ImageProcessor();
+
+            await inkCanvas.InkPresenter.StrokeContainer.SaveAsync(stream);
+            await imageProcessor.Process(stream, (int)inkCanvas.ActualWidth, (int)inkCanvas.ActualHeight);
         }
 
         #endregion

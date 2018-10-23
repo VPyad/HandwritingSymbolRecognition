@@ -35,6 +35,14 @@ namespace HandwritingSymbolRecognition.Services
             //await SaveStreamToFile(wbImageStream, trainSetConfig.ImageWidth, trainSetConfig.ImageHeight);
         }
 
+        public async Task Process(IRandomAccessStream imageStream, int width, int height)
+        {
+            var resizedImageStream = await ResizeImage(imageStream, width, height, trainSetConfig.ImageWidth, trainSetConfig.ImageHeight);
+            var wbImageStream = await ConvertToBW(resizedImageStream, trainSetConfig.ImageWidth, trainSetConfig.ImageHeight);
+
+            await SaveStreamToFile(wbImageStream, trainSetConfig.ImageWidth, trainSetConfig.ImageHeight);
+        }
+
         private async Task<IRandomAccessStream> ResizeImage(IRandomAccessStream imageStream, int sourceWidth, int sourceHeight, int width, int height)
         {
             WriteableBitmap bitmap = new WriteableBitmap(sourceWidth, sourceHeight);
