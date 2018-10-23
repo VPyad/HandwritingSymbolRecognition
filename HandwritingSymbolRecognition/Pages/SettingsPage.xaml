@@ -46,6 +46,7 @@
             <StackPanel Orientation="Vertical" Margin="10,10,10,0">
                 <StackPanel Orientation="Horizontal">
                     <Button x:Name="trainButton" Click="OnTrainButtonClicked" Content="Train" Width="125"/>
+                    <ProgressRing x:Name="trainProgressRing" Margin="5,0,5,0" Visibility="Collapsed" IsActive="True"/>
                     <TextBlock Padding="5,0,0,0" Text="Starts train" TextAlignment="Center" VerticalAlignment="Center" Style="{StaticResource CaptionTextBlockStyle}"/>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" Margin="0,5,0,0">

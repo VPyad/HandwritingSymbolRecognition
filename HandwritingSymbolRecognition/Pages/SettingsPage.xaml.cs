@@ -95,7 +95,7 @@ namespace HandwritingSymbolRecognition.Pages
 
         private void OnTrainButtonClicked(object sender, RoutedEventArgs e)
         {
-
+            trainProgressRing.Visibility = Visibility.Visible;
         }
 
         private void OnDeleteModelButtonClicked(object sender, RoutedEventArgs e)
