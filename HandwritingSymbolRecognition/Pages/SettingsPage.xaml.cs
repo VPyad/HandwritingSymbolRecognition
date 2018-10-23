@@ -1,5 +1,6 @@
 ﻿using HandwritingSymbolRecognition.Helpers;
 using HandwritingSymbolRecognition.Models.TrainingSet;
+using HandwritingSymbolRecognition.Services;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -84,8 +85,13 @@ namespace HandwritingSymbolRecognition.Pages
                 DecorateResultPickerTextBlock(symbol1ResultPickerTextBlock, false);
                 return;
             }
-
+            
             DecorateResultPickerTextBlock(symbol1ResultPickerTextBlock, true, files.Count());
+            
+            ImageProcessor imageProcessor = new ImageProcessor();
+
+            foreach (var file in files)
+                await imageProcessor.Process(file);
         }
 
         private async void OnSymbol2ButtonClicked(object sender, RoutedEventArgs e)
