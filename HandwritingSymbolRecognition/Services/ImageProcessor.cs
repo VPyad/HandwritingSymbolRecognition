@@ -168,16 +168,6 @@ namespace HandwritingSymbolRecognition.Services
                 await encoder.FlushAsync();
 
                 return resizedStream;
-                /*resizedStream.Seek(0);
-                var outBuffer = new byte[resizedStream.Size];
-                await resizedStream.ReadAsync(outBuffer.AsBuffer(), (uint)resizedStream.Size, InputStreamOptions.None);
-
-
-
-                StorageFolder storageFolder = ApplicationData.Current.LocalFolder;
-                Debug.WriteLine(storageFolder.Path);
-                StorageFile sampleFile = await storageFolder.CreateFileAsync(Guid.NewGuid().ToString() + ".png", CreationCollisionOption.ReplaceExisting);
-                await FileIO.WriteBytesAsync(sampleFile, outBuffer);*/
             }
         }
     }
