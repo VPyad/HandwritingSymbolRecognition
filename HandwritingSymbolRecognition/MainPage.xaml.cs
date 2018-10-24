@@ -9,8 +9,12 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.Graphics.Display;
+using Windows.Graphics.Imaging;
+using Windows.Storage;
 using Windows.Storage.Streams;
 using Windows.UI.Input.Inking;
 using Windows.UI.Xaml;
@@ -19,6 +23,7 @@ using Windows.UI.Xaml.Controls.Primitives;
 using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
+using Windows.UI.Xaml.Media.Imaging;
 using Windows.UI.Xaml.Navigation;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
@@ -98,7 +103,7 @@ namespace HandwritingSymbolRecognition
             }
             else
             {
-                Windows.UI.Xaml.Media.CompositionTarget.Rendering -= CompositionTarget_Rendering;
+                CompositionTarget.Rendering -= CompositionTarget_Rendering;
                 pendingDry = null;
 
                 inkSynchronizer.EndDry();
@@ -120,8 +125,8 @@ namespace HandwritingSymbolRecognition
             InMemoryRandomAccessStream stream = new InMemoryRandomAccessStream();
             ImageProcessor imageProcessor = new ImageProcessor();
 
-            await inkCanvas.InkPresenter.StrokeContainer.SaveAsync(stream);
-            await imageProcessor.Process(stream, (int)inkCanvas.ActualWidth, (int)inkCanvas.ActualHeight);
+            var file = await SaveDrawing();
+            await imageProcessor.Process(file);
         }
 
         #endregion
@@ -149,6 +154,40 @@ namespace HandwritingSymbolRecognition
         {
             strokes.Clear();
             drawingCanvas.Invalidate();
+        }
+
+        private async Task<StorageFile> SaveDrawing()
+        {
+            var displayInformation = DisplayInformation.GetForCurrentView();
+            var imageSize = drawingCanvas.RenderSize;
+
+            drawingCanvas.Measure(imageSize);
+            drawingCanvas.UpdateLayout();
+            drawingCanvas.Arrange(new Rect(0, 0, imageSize.Width, imageSize.Height));
+
+            var renderTargetBitmap = new RenderTargetBitmap();
+            await renderTargetBitmap.RenderAsync(drawingCanvas, Convert.ToInt32(imageSize.Width), Convert.ToInt32(imageSize.Height));
+
+            var pixelBuffer = await renderTargetBitmap.GetPixelsAsync();
+            var file = await ApplicationData.Current.LocalFolder.CreateFileAsync("user-input.png", CreationCollisionOption.ReplaceExisting);
+
+            using (var fileStream = await file.OpenAsync(FileAccessMode.ReadWrite))
+            {
+                var encoder = await BitmapEncoder.CreateAsync(BitmapEncoder.JpegEncoderId, fileStream);
+
+                encoder.SetPixelData(
+                        BitmapPixelFormat.Bgra8,
+                        BitmapAlphaMode.Ignore,
+                        (uint)renderTargetBitmap.PixelWidth,
+                        (uint)renderTargetBitmap.PixelHeight,
+                        displayInformation.LogicalDpi,
+                        displayInformation.LogicalDpi,
+                        pixelBuffer.ToArray());
+
+                await encoder.FlushAsync();
+            }
+
+            return file;
         }
         #endregion
     }
