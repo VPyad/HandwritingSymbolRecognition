@@ -13,7 +13,7 @@
         <AppBar IsSticky="True" IsOpen="True">
             <StackPanel Orientation="Horizontal">
                 <AppBarButton Label="Train" Icon="Accept" />
-                <AppBarButton Label="Recognize" Icon="Globe" />
+                <AppBarButton Label="Recognize" Icon="Globe" Click="OnRecognizedButtonClicked" />
                 <AppBarSeparator/>
                 <AppBarButton Label="Clear" Icon="Clear" Click="OnClear" />
                 <AppBarSeparator/>
@@ -23,7 +23,7 @@
     </Page.TopAppBar>
 
     <Grid>
-        <canvas:CanvasControl Draw="DrawCanvas" ClearColor="Beige" x:Name="drawingCanvas"/>
+        <canvas:CanvasControl Draw="DrawCanvas" ClearColor="White" x:Name="drawingCanvas"/>
         <InkCanvas x:Name="inkCanvas"/>
         <InkToolbar TargetInkCanvas="{x:Bind inkCanvas}"
              VerticalAlignment="Bottom" x:Name="inkToolbar"/>
