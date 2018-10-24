@@ -23,7 +23,7 @@
     </Page.TopAppBar>
 
     <Grid>
-        <canvas:CanvasControl Draw="DrawCanvas" ClearColor="Beige" x:Name="drawingCanvas"/>
+        <canvas:CanvasControl Draw="DrawCanvas" ClearColor="White" x:Name="drawingCanvas"/>
         <InkCanvas x:Name="inkCanvas"/>
         <InkToolbar TargetInkCanvas="{x:Bind inkCanvas}"
              VerticalAlignment="Bottom" x:Name="inkToolbar"/>

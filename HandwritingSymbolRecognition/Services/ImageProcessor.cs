@@ -29,7 +29,7 @@ namespace HandwritingSymbolRecognition.Services
         {
             var imageProps = await file.Properties.GetImagePropertiesAsync();
 
-            var resizedImageStream = await ResizeImage(await file.OpenReadAsync(), (int)imageProps.Width, (int)imageProps.Height, trainSetConfig.ImageWidth, trainSetConfig.ImageHeight);
+            var resizedImageStream = await ResizeImageWithoutBitmap(await file.OpenReadAsync(), trainSetConfig.ImageWidth, trainSetConfig.ImageHeight);
             var wbImageStream = await ConvertToBW(resizedImageStream, trainSetConfig.ImageWidth, trainSetConfig.ImageHeight);
 
             await SaveStreamToFile(wbImageStream, trainSetConfig.ImageWidth, trainSetConfig.ImageHeight);
@@ -40,7 +40,7 @@ namespace HandwritingSymbolRecognition.Services
             WriteableBitmap bitmap = new WriteableBitmap(sourceWidth, sourceHeight);
 
             bitmap.SetSource(imageStream);
-            bitmap = bitmap.Resize(width, height, WriteableBitmapExtensions.Interpolation.Bilinear);
+            bitmap = bitmap.Resize(width, height, WriteableBitmapExtensions.Interpolation.NearestNeighbor);
 
             InMemoryRandomAccessStream outputStream = new InMemoryRandomAccessStream();
             await bitmap.ToStream(outputStream, BitmapEncoder.PngEncoderId);
@@ -72,7 +72,7 @@ namespace HandwritingSymbolRecognition.Services
             WriteableBitmap bitmap = new WriteableBitmap(width, height);
 
             bitmap.SetSource(imageStream);
-            
+
             var stFile = await ApplicationData.Current.LocalFolder.CreateFileAsync(Guid.NewGuid().ToString() + ".png", CreationCollisionOption.GenerateUniqueName);
             using (IRandomAccessStream stream = await stFile.OpenAsync(FileAccessMode.ReadWrite))
             {
@@ -133,6 +133,51 @@ namespace HandwritingSymbolRecognition.Services
                 Debug.WriteLine(storageFolder.Path);
                 StorageFile sampleFile = await storageFolder.CreateFileAsync(Guid.NewGuid().ToString() + ".png", CreationCollisionOption.ReplaceExisting);
                 await FileIO.WriteBytesAsync(sampleFile, outBuffer);
+            }
+        }
+
+        private async Task<IRandomAccessStream> ResizeImageWithoutBitmap(IRandomAccessStream imageStream, int width, int height)
+        {
+            //open file as stream
+            using (IRandomAccessStream fileStream = imageStream)
+            {
+                var decoder = await BitmapDecoder.CreateAsync(fileStream);
+
+                var resizedStream = new InMemoryRandomAccessStream();
+
+                BitmapEncoder encoder = await BitmapEncoder.CreateForTranscodingAsync(resizedStream, decoder);
+                double widthRatio = (double)width / decoder.PixelWidth;
+                double heightRatio = (double)height / decoder.PixelHeight;
+
+                double scaleRatio = Math.Min(widthRatio, heightRatio);
+
+                if (width == 0)
+                    scaleRatio = heightRatio;
+
+                if (height == 0)
+                    scaleRatio = widthRatio;
+
+                uint aspectHeight = (uint)Math.Floor(decoder.PixelHeight * scaleRatio);
+                uint aspectWidth = (uint)Math.Floor(decoder.PixelWidth * scaleRatio);
+
+                encoder.BitmapTransform.InterpolationMode = BitmapInterpolationMode.Linear;
+
+                encoder.BitmapTransform.ScaledHeight = aspectHeight;
+                encoder.BitmapTransform.ScaledWidth = aspectWidth;
+
+                await encoder.FlushAsync();
+
+                return resizedStream;
+                /*resizedStream.Seek(0);
+                var outBuffer = new byte[resizedStream.Size];
+                await resizedStream.ReadAsync(outBuffer.AsBuffer(), (uint)resizedStream.Size, InputStreamOptions.None);
+
+
+
+                StorageFolder storageFolder = ApplicationData.Current.LocalFolder;
+                Debug.WriteLine(storageFolder.Path);
+                StorageFile sampleFile = await storageFolder.CreateFileAsync(Guid.NewGuid().ToString() + ".png", CreationCollisionOption.ReplaceExisting);
+                await FileIO.WriteBytesAsync(sampleFile, outBuffer);*/
             }
         }
     }
