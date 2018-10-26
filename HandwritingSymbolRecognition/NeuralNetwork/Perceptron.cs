@@ -56,7 +56,7 @@ namespace HandwritingSymbolRecognition.NeuralNetwork
                 sum += cells[i - 1] * weights[i];
             }
 
-            int result = sum >= 0 ? 1 : 0;
+            result = sum >= 0 ? 1 : 0;
 
             if (result == 0)
                 return trainSetConfig.Train1;
