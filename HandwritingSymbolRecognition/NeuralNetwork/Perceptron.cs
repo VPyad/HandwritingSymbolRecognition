@@ -47,11 +47,40 @@ namespace HandwritingSymbolRecognition.NeuralNetwork
 
         public TrainConfig Activation(IRandomAccessStream imageStream)
         {
-            throw new NotImplementedException();
+            ProcessImageStream(imageStream);
+
+            double sum = 0;
+            sum += weights[0];
+            for (int i = 1; i < cellsCount + 1; i++)
+            {
+                sum += cells[i - 1] * weights[i];
+            }
+
+            int result = sum >= 0 ? 1 : 0;
+
+            if (result == 0)
+                return trainSetConfig.Train1;
+            else
+                return trainSetConfig.Train2;
         }
 
         public void Calculate(IRandomAccessStream imageStream, TrainConfig trainConfig)
-        { }
+        {
+            ProcessImageStream(imageStream);
+
+            var delta = trainConfig.Value - result;
+            weights[0] = weights[0] + WEAIGHT_INIT_COEFICIENT * delta;
+
+            for (int i = 1; i < cellsCount + 1; i++)
+            {
+                weights[i] = weights[i] + WEAIGHT_INIT_COEFICIENT * delta * cells[i - 1];
+            }
+        }
+
+        private void ProcessImageStream(IRandomAccessStream imageStream)
+        {
+            throw new NotImplementedException();
+        }
 
         private async Task SaveModel()
         {
