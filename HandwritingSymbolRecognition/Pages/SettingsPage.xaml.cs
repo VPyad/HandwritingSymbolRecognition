@@ -1,5 +1,6 @@
 ﻿using HandwritingSymbolRecognition.Helpers;
 using HandwritingSymbolRecognition.Models.TrainingSet;
+using HandwritingSymbolRecognition.NeuralNetwork;
 using HandwritingSymbolRecognition.Services;
 using System;
 using System.Collections.Generic;
@@ -104,9 +105,9 @@ namespace HandwritingSymbolRecognition.Pages
             trainProgressRing.Visibility = Visibility.Visible;
         }
 
-        private void OnDeleteModelButtonClicked(object sender, RoutedEventArgs e)
+        private async void OnDeleteModelButtonClicked(object sender, RoutedEventArgs e)
         {
-
+            await Perceptron.DeleteModel();
         }
         #endregion
 

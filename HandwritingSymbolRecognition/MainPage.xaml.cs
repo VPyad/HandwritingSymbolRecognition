@@ -1,4 +1,5 @@
 ﻿using HandwritingSymbolRecognition.Helpers;
+using HandwritingSymbolRecognition.NeuralNetwork;
 using HandwritingSymbolRecognition.Pages;
 using HandwritingSymbolRecognition.Services;
 using Microsoft.Graphics.Canvas;
@@ -127,6 +128,13 @@ namespace HandwritingSymbolRecognition
 
             var file = await SaveDrawing();
             await imageProcessor.Process(file);
+        }
+
+        private async void OnTrainButtonClicked(object sender, RoutedEventArgs e)
+        {
+            Perceptron perceptron = new Perceptron(true);
+
+            //await perceptron.SaveModel();
         }
 
         #endregion

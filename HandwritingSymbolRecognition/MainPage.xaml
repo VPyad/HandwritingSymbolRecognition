@@ -12,7 +12,7 @@
     <Page.TopAppBar>
         <AppBar IsSticky="True" IsOpen="True">
             <StackPanel Orientation="Horizontal">
-                <AppBarButton Label="Train" Icon="Accept" />
+                <AppBarButton Label="Train" Icon="Accept" Click="OnTrainButtonClicked" />
                 <AppBarButton Label="Recognize" Icon="Globe" Click="OnRecognizedButtonClicked" />
                 <AppBarSeparator/>
                 <AppBarButton Label="Clear" Icon="Clear" Click="OnClear" />
