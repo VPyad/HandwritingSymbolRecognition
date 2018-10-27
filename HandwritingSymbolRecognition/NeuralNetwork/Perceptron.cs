@@ -47,9 +47,9 @@ namespace HandwritingSymbolRecognition.NeuralNetwork
             InitFields(loadModel);
         }
 
-        public TrainConfig Activation(IRandomAccessStream imageStream)
+        public async Task<TrainConfig> Activation(IRandomAccessStream imageStream)
         {
-            ProcessImageStream(imageStream);
+            await ProcessImageStream(imageStream);
 
             double sum = 0;
             sum += weights[0];
@@ -68,7 +68,7 @@ namespace HandwritingSymbolRecognition.NeuralNetwork
 
         public async Task Calculate(IRandomAccessStream imageStream, TrainConfig trainConfig)
         {
-            ProcessImageStream(imageStream);
+            await ProcessImageStream(imageStream);
 
             var delta = trainConfig.Value - result;
             weights[0] = weights[0] + WEAIGHT_INIT_COEFICIENT * delta;
@@ -81,9 +81,9 @@ namespace HandwritingSymbolRecognition.NeuralNetwork
             await SaveModel();
         }
 
-        private void ProcessImageStream(IRandomAccessStream imageStream)
+        private async Task ProcessImageStream(IRandomAccessStream imageStream)
         {
-            cells = imageProcessor.GetCells(imageStream, cellsCount);
+            cells = await imageProcessor.GetCells(imageStream, cellsCount);
         }
 
         private async Task SaveModel()

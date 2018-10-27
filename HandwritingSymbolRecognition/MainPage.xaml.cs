@@ -138,7 +138,7 @@ namespace HandwritingSymbolRecognition
             var file = await SaveDrawing();
             var imageStream = await imageProcessor.Process(file);
 
-            TrainConfig result = perceptron.Activation(imageStream);
+            TrainConfig result = await perceptron.Activation(imageStream);
 
             var recognitionResult = await RecognizeDialog.ShowDialogAsync(result.Symbol);
 
@@ -151,7 +151,6 @@ namespace HandwritingSymbolRecognition
             }
 
             ClearCanvas();
-
         }
 
         private async void OnTrainButtonClicked(object sender, RoutedEventArgs e)
@@ -195,8 +194,10 @@ namespace HandwritingSymbolRecognition
             drawingCanvas.Invalidate();
         }
 
-        private async Task<StorageFile> SaveDrawing()
+        private async Task<StorageFile> SaveDrawing(string fileName = null)
         {
+            fileName = string.IsNullOrEmpty(fileName) ? "user-input" : fileName;
+
             var displayInformation = DisplayInformation.GetForCurrentView();
             var imageSize = drawingCanvas.RenderSize;
 
@@ -208,7 +209,7 @@ namespace HandwritingSymbolRecognition
             await renderTargetBitmap.RenderAsync(drawingCanvas, Convert.ToInt32(imageSize.Width), Convert.ToInt32(imageSize.Height));
 
             var pixelBuffer = await renderTargetBitmap.GetPixelsAsync();
-            var file = await ApplicationData.Current.LocalFolder.CreateFileAsync("user-input.png", CreationCollisionOption.ReplaceExisting);
+            var file = await ApplicationData.Current.LocalFolder.CreateFileAsync(fileName + ".png", CreationCollisionOption.ReplaceExisting);
 
             using (var fileStream = await file.OpenAsync(FileAccessMode.ReadWrite))
             {
@@ -232,10 +233,8 @@ namespace HandwritingSymbolRecognition
 
         private async void OnMagicButtonClicked(object sender, RoutedEventArgs e)
         {
-            var config = await TrainSetConfigHelper.ParseConfigJson();
-
-            var oppositConfig = await TrainSetConfigHelper.GetOppositTrainConfig(config.Train1);
-            Debug.WriteLine(oppositConfig.Value);
+            await SaveDrawing(Guid.NewGuid().ToString());
+            ClearCanvas();
         }
     }
 }

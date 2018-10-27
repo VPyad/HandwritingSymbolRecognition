@@ -21,7 +21,7 @@
                 <AppBarSeparator/>
                 <AppBarButton Label="Settings" Icon="Setting" Click="OnSettingsButtonClicked"/>
                 <AppBarSeparator/>
-                <AppBarButton Label="Magic" Icon="Manage" Click="OnMagicButtonClicked"/>
+                <AppBarButton Label="Save" Visibility="Collapsed" Icon="Street" Click="OnMagicButtonClicked"/>
             </StackPanel>
         </AppBar>
     </Page.TopAppBar>
