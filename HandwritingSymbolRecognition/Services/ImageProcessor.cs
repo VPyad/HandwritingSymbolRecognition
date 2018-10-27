@@ -8,6 +8,7 @@ using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
 using System.Threading.Tasks;
+using Windows.Foundation;
 using Windows.Graphics.Imaging;
 using Windows.Storage;
 using Windows.Storage.Streams;
@@ -62,6 +63,76 @@ namespace HandwritingSymbolRecognition.Services
             return outputStream;
         }
 
+        public int[] GetCells(IRandomAccessStream imageStream, int cellsCount)
+        {
+            int[] cells = new int[cellsCount];
+            int[] cellValues = new int[cellsCount];
+
+            Dictionary<Point, Color> pixels = new Dictionary<Point, Color>();
+
+            WriteableBitmap bitmap = new WriteableBitmap(trainSetConfig.ImageWidth, trainSetConfig.ImageHeight);
+            bitmap.SetSource(imageStream);
+
+            for (int i = 0; i < bitmap.PixelWidth; i++)
+            {
+                for (int j = 0; j < bitmap.PixelHeight; j++)
+                {
+                    var color = bitmap.GetPixel(i, j);
+                    if (color.A == 255 && color.R == 0 && color.G == 0 && color.B == 0)
+                        pixels.Add(new Point(i, j), color);
+                }
+            }
+
+            if (pixels.Count == 0)
+                return null;
+
+            var leftTop = new Point(pixels.Min(p => p.Key.X), pixels.Min(p => p.Key.Y));
+            var rightBottom = new Point(pixels.Max(p => p.Key.X), pixels.Max(p => p.Key.Y));
+
+            WriteableBitmap boundBitmap = new WriteableBitmap((int)(rightBottom.X - leftTop.X + 1), (int)(rightBottom.Y - leftTop.Y + 1));
+
+            foreach (var pixel in pixels)
+            {
+                boundBitmap.SetPixel((int)(pixel.Key.X - leftTop.X), (int)(pixel.Key.Y - leftTop.Y), pixel.Value);
+            }
+
+            var stretchX = boundBitmap.PixelWidth / trainSetConfig.ImageWidth;
+            var stretchY = boundBitmap.PixelHeight / trainSetConfig.ImageHeight;
+
+            WriteableBitmap stretchedBitmap = new WriteableBitmap(100, 100);
+
+            for (int i = 0; i < 100; i++)
+            {
+                for (int j = 0; j < 100; j++)
+                {
+                    var color = boundBitmap.GetPixel(i * stretchX, j * stretchY);
+                    stretchedBitmap.SetPixel(i, j, color);
+                }
+            }
+
+            for (int i = 0; i < stretchedBitmap.PixelWidth; i++)
+            {
+                for (int j = 0; j < stretchedBitmap.PixelHeight; j++)
+                {
+                    var color = stretchedBitmap.GetPixel(i, j);
+                    if (color.A == 255 && color.R == 0 && color.G == 0 && color.B == 0)
+                    {
+                        cellValues[i * trainSetConfig.ImageWidth + j]++;
+                    }
+                }
+            }
+
+            for (int i = 0; i < cellsCount; i++)
+            {
+                if (cellValues[i] > 5)
+                {
+                    cells[i] = 1;
+                }
+            }
+
+            return cells;
+        }
+
         private async void InitConfig()
         {
             trainSetConfig = await TrainSetConfigHelper.ParseConfigJson();
@@ -90,7 +161,7 @@ namespace HandwritingSymbolRecognition.Services
                 await encoder.FlushAsync();
             }
 
-            Debug.WriteLine(stFile.Path);
+            //Debug.WriteLine(stFile.Path);
         }
 
         private async Task ResizeImageWithoutBitmap(StorageFile file, int width, int height)
