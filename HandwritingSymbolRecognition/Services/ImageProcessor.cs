@@ -26,14 +26,14 @@ namespace HandwritingSymbolRecognition.Services
             InitConfig();
         }
 
-        public async Task Process(StorageFile file)
+        public async Task<IRandomAccessStream> Process(StorageFile file)
         {
             var imageProps = await file.Properties.GetImagePropertiesAsync();
 
             var resizedImageStream = await ResizeImageWithoutBitmap(await file.OpenReadAsync(), trainSetConfig.ImageWidth, trainSetConfig.ImageHeight);
             var wbImageStream = await ConvertToBW(resizedImageStream, trainSetConfig.ImageWidth, trainSetConfig.ImageHeight);
 
-            await SaveStreamToFile(wbImageStream, trainSetConfig.ImageWidth, trainSetConfig.ImageHeight);
+            return wbImageStream;
         }
 
         private async Task<IRandomAccessStream> ResizeImage(IRandomAccessStream imageStream, int sourceWidth, int sourceHeight, int width, int height)

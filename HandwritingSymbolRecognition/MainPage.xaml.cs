@@ -1,4 +1,6 @@
-﻿using HandwritingSymbolRecognition.Helpers;
+﻿using HandwritingSymbolRecognition.Dialogs;
+using HandwritingSymbolRecognition.Helpers;
+using HandwritingSymbolRecognition.Models.TrainingSet;
 using HandwritingSymbolRecognition.NeuralNetwork;
 using HandwritingSymbolRecognition.Pages;
 using HandwritingSymbolRecognition.Services;
@@ -42,6 +44,9 @@ namespace HandwritingSymbolRecognition
         private IReadOnlyList<InkStroke> pendingDry;
         private InkPresenter inkPresenter;
 
+        ImageProcessor imageProcessor;
+        Perceptron perceptron;
+
         private int deferredDryDelay;
         #endregion
 
@@ -57,7 +62,9 @@ namespace HandwritingSymbolRecognition
         #region Events
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
-            //var inkPresenter = inkCanvas.InkPresenter;
+            imageProcessor = new ImageProcessor();
+            perceptron = new Perceptron();
+
             inkPresenter = inkCanvas.InkPresenter;
 
             inkSynchronizer = inkPresenter.ActivateCustomDrying();
@@ -124,17 +131,34 @@ namespace HandwritingSymbolRecognition
         private async void OnRecognizedButtonClicked(object sender, RoutedEventArgs e)
         {
             InMemoryRandomAccessStream stream = new InMemoryRandomAccessStream();
-            ImageProcessor imageProcessor = new ImageProcessor();
 
             var file = await SaveDrawing();
-            await imageProcessor.Process(file);
+            var imageStream = await imageProcessor.Process(file);
+
+            TrainConfig result = perceptron.Activation(imageStream);
+
+            var recognitionResult = await RecognizeDialog.ShowDialogAsync(result.Symbol);
+
+            if (recognitionResult == RecognitionResult.Right)
+                perceptron.Calculate(imageStream, result);
+            else
+            {
+                var rightConfig = await TrainSetConfigHelper.GetOppositTrainConfig(result);
+                perceptron.Calculate(imageStream, rightConfig);
+            }
+
         }
 
         private async void OnTrainButtonClicked(object sender, RoutedEventArgs e)
         {
-            Perceptron perceptron = new Perceptron(true);
+            InMemoryRandomAccessStream stream = new InMemoryRandomAccessStream();
 
-            //await perceptron.SaveModel();
+            var file = await SaveDrawing();
+            var imageStream = await imageProcessor.Process(file);
+
+            var config = await TrainDialog.ShowDialogAsync();
+
+            perceptron.Calculate(imageStream, config);
         }
 
         #endregion

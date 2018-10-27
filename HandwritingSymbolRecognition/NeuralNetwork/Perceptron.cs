@@ -1,5 +1,6 @@
 ﻿using HandwritingSymbolRecognition.Helpers;
 using HandwritingSymbolRecognition.Models.TrainingSet;
+using HandwritingSymbolRecognition.Services;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -15,6 +16,7 @@ namespace HandwritingSymbolRecognition.NeuralNetwork
     {
         #region Fields
         private TrainSetConfig trainSetConfig;
+        private ImageProcessor imageProcessor;
 
         private int[] cells;
         private double[] weights;
@@ -79,7 +81,7 @@ namespace HandwritingSymbolRecognition.NeuralNetwork
 
         private void ProcessImageStream(IRandomAccessStream imageStream)
         {
-            throw new NotImplementedException();
+            cells = imageProcessor.GetCells(imageStream, cellsCount);
         }
 
         private async Task SaveModel()
@@ -115,6 +117,7 @@ namespace HandwritingSymbolRecognition.NeuralNetwork
         private async void InitFields(bool loadModel)
         {
             trainSetConfig = await TrainSetConfigHelper.ParseConfigJson();
+            imageProcessor = new ImageProcessor();
 
             rowCellsCount = trainSetConfig.ImageWidth;
             columnCellCount = trainSetConfig.ImageHeight;
