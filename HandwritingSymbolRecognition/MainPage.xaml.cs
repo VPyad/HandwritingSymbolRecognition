@@ -20,6 +20,7 @@ using Windows.Graphics.Imaging;
 using Windows.Storage;
 using Windows.Storage.Streams;
 using Windows.UI.Input.Inking;
+using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -62,6 +63,8 @@ namespace HandwritingSymbolRecognition
         #region Events
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
+            ApplicationView.GetForCurrentView().TryResizeView(new Size(500, 355)); // for larger view size image recognition accuracy may drop
+
             imageProcessor = new ImageProcessor();
             perceptron = new Perceptron();
 
@@ -140,12 +143,14 @@ namespace HandwritingSymbolRecognition
             var recognitionResult = await RecognizeDialog.ShowDialogAsync(result.Symbol);
 
             if (recognitionResult == RecognitionResult.Right)
-                perceptron.Calculate(imageStream, result);
+                await perceptron.Calculate(imageStream.CloneStream(), result);
             else
             {
                 var rightConfig = await TrainSetConfigHelper.GetOppositTrainConfig(result);
-                perceptron.Calculate(imageStream, rightConfig);
+                await perceptron.Calculate(imageStream.CloneStream(), rightConfig);
             }
+
+            ClearCanvas();
 
         }
 
@@ -158,7 +163,9 @@ namespace HandwritingSymbolRecognition
 
             var config = await TrainDialog.ShowDialogAsync();
 
-            perceptron.Calculate(imageStream, config);
+            await perceptron.Calculate(imageStream, config);
+
+            ClearCanvas();
         }
 
         #endregion
@@ -222,5 +229,13 @@ namespace HandwritingSymbolRecognition
             return file;
         }
         #endregion
+
+        private async void OnMagicButtonClicked(object sender, RoutedEventArgs e)
+        {
+            var config = await TrainSetConfigHelper.ParseConfigJson();
+
+            var oppositConfig = await TrainSetConfigHelper.GetOppositTrainConfig(config.Train1);
+            Debug.WriteLine(oppositConfig.Value);
+        }
     }
 }

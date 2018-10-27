@@ -19,6 +19,8 @@ namespace HandwritingSymbolRecognition.Services
 {
     public class ImageProcessor
     {
+        private const int MAGIC_COEFICIENT = 3;
+
         private TrainSetConfig trainSetConfig;
 
         public ImageProcessor()
@@ -31,7 +33,10 @@ namespace HandwritingSymbolRecognition.Services
             var imageProps = await file.Properties.GetImagePropertiesAsync();
 
             var resizedImageStream = await ResizeImageWithoutBitmap(await file.OpenReadAsync(), trainSetConfig.ImageWidth, trainSetConfig.ImageHeight);
+            await SaveStreamToFile(resizedImageStream.CloneStream(), trainSetConfig.ImageWidth, trainSetConfig.ImageHeight, "resized");
+
             var wbImageStream = await ConvertToBW(resizedImageStream, trainSetConfig.ImageWidth, trainSetConfig.ImageHeight);
+            await SaveStreamToFile(wbImageStream.CloneStream(), trainSetConfig.ImageWidth, trainSetConfig.ImageHeight, "grayed");
 
             return wbImageStream;
         }
@@ -41,6 +46,7 @@ namespace HandwritingSymbolRecognition.Services
             WriteableBitmap bitmap = new WriteableBitmap(sourceWidth, sourceHeight);
 
             bitmap.SetSource(imageStream);
+
             bitmap = bitmap.Resize(width, height, WriteableBitmapExtensions.Interpolation.NearestNeighbor);
 
             InMemoryRandomAccessStream outputStream = new InMemoryRandomAccessStream();
@@ -48,14 +54,21 @@ namespace HandwritingSymbolRecognition.Services
 
             return outputStream;
         }
-
+                
         public async Task<IRandomAccessStream> ConvertToBW(IRandomAccessStream imageStream, int width, int height)
         {
             WriteableBitmap bitmap = new WriteableBitmap(width, height);
 
             bitmap.SetSource(imageStream);
 
-            bitmap = bitmap.Gray();
+            try
+            {
+                bitmap = bitmap.Gray();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
+            }
 
             InMemoryRandomAccessStream outputStream = new InMemoryRandomAccessStream();
             await bitmap.ToStream(outputStream, BitmapEncoder.PngEncoderId);
@@ -78,7 +91,8 @@ namespace HandwritingSymbolRecognition.Services
                 for (int j = 0; j < bitmap.PixelHeight; j++)
                 {
                     var color = bitmap.GetPixel(i, j);
-                    if (color.A == 255 && color.R == 0 && color.G == 0 && color.B == 0)
+
+                    if (color.A == 255 && color.R != 255 && color.G != 255 && color.B != 255)
                         pixels.Add(new Point(i, j), color);
                 }
             }
@@ -115,21 +129,22 @@ namespace HandwritingSymbolRecognition.Services
                 for (int j = 0; j < stretchedBitmap.PixelHeight; j++)
                 {
                     var color = stretchedBitmap.GetPixel(i, j);
-                    if (color.A == 255 && color.R == 0 && color.G == 0 && color.B == 0)
+                    if (color.A == 255 && color.R != 255 && color.G != 255 && color.B != 255)
                     {
-                        cellValues[i * trainSetConfig.ImageWidth + j]++;
+                        cellValues[i / MAGIC_COEFICIENT * trainSetConfig.ImageWidth + j / MAGIC_COEFICIENT]++;
                     }
                 }
             }
 
             for (int i = 0; i < cellsCount; i++)
             {
-                if (cellValues[i] > 5)
+                if (cellValues[i] > MAGIC_COEFICIENT)
                 {
-                    cells[i] = 1;
+                    cells[i] = 1; 
                 }
             }
 
+            Debug.WriteLine(cells.Count(x => x == 1), "QWERTY");
             return cells;
         }
 
@@ -138,13 +153,15 @@ namespace HandwritingSymbolRecognition.Services
             trainSetConfig = await TrainSetConfigHelper.ParseConfigJson();
         }
 
-        private async Task SaveStreamToFile(IRandomAccessStream imageStream, int width, int height)
+        private async Task SaveStreamToFile(IRandomAccessStream imageStream, int width, int height, string fileName = null)
         {
             WriteableBitmap bitmap = new WriteableBitmap(width, height);
 
             bitmap.SetSource(imageStream);
 
-            var stFile = await ApplicationData.Current.LocalFolder.CreateFileAsync(Guid.NewGuid().ToString() + ".png", CreationCollisionOption.GenerateUniqueName);
+            string name = string.IsNullOrEmpty(fileName) ? Guid.NewGuid().ToString() : fileName;
+
+            var stFile = await ApplicationData.Current.LocalFolder.CreateFileAsync(name + ".png", CreationCollisionOption.GenerateUniqueName);
             using (IRandomAccessStream stream = await stFile.OpenAsync(FileAccessMode.ReadWrite))
             {
                 BitmapEncoder encoder = await BitmapEncoder.CreateAsync(BitmapEncoder.PngEncoderId, stream);
@@ -161,12 +178,11 @@ namespace HandwritingSymbolRecognition.Services
                 await encoder.FlushAsync();
             }
 
-            //Debug.WriteLine(stFile.Path);
+            Debug.WriteLine(stFile.Path);
         }
 
         private async Task ResizeImageWithoutBitmap(StorageFile file, int width, int height)
         {
-            //open file as stream
             using (IRandomAccessStream fileStream = await file.OpenAsync(FileAccessMode.ReadWrite))
             {
                 var decoder = await BitmapDecoder.CreateAsync(fileStream);

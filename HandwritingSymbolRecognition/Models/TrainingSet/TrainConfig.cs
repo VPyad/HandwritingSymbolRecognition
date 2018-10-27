@@ -15,7 +15,7 @@ namespace HandwritingSymbolRecognition.Models.TrainingSet
         public override bool Equals(object obj)
         {
             var config = obj as TrainConfig;
-
+            
             return config != null && Symbol == config.Symbol && Value == config.Value;
         }
     }

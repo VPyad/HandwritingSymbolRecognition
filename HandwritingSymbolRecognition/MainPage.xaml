@@ -7,7 +7,9 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+    Width="500"
+    Height="355">
 
     <Page.TopAppBar>
         <AppBar IsSticky="True" IsOpen="True">
@@ -18,14 +20,18 @@
                 <AppBarButton Label="Clear" Icon="Clear" Click="OnClear" />
                 <AppBarSeparator/>
                 <AppBarButton Label="Settings" Icon="Setting" Click="OnSettingsButtonClicked"/>
+                <AppBarSeparator/>
+                <AppBarButton Label="Magic" Icon="Manage" Click="OnMagicButtonClicked"/>
             </StackPanel>
         </AppBar>
     </Page.TopAppBar>
 
-    <Grid>
+    <Grid x:Name="mainGrid">
         <canvas:CanvasControl Draw="DrawCanvas" ClearColor="White" x:Name="drawingCanvas"/>
         <InkCanvas x:Name="inkCanvas"/>
         <InkToolbar TargetInkCanvas="{x:Bind inkCanvas}"
-             VerticalAlignment="Bottom" x:Name="inkToolbar"/>
+             VerticalAlignment="Bottom" x:Name="inkToolbar" InitialControls="None">
+            <InkToolbarBallpointPenButton SelectedStrokeWidth="24"/>
+        </InkToolbar>
     </Grid>
 </Page>

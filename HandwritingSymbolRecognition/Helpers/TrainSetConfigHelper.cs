@@ -44,9 +44,9 @@ namespace HandwritingSymbolRecognition.Helpers
             var config = await ParseConfigJson();
 
             if (config.Train1.Equals(trainConfig))
-                return config.Train1;
-            else
                 return config.Train2;
+            else
+                return config.Train1;
         }
     }
 }
