@@ -133,6 +133,8 @@ namespace HandwritingSymbolRecognition
 
         private async void OnRecognizedButtonClicked(object sender, RoutedEventArgs e)
         {
+            progressRing.Visibility = Visibility.Visible;
+
             InMemoryRandomAccessStream stream = new InMemoryRandomAccessStream();
 
             var file = await SaveDrawing();
@@ -140,7 +142,11 @@ namespace HandwritingSymbolRecognition
 
             TrainConfig result = await perceptron.Activation(imageStream);
 
+            progressRing.Visibility = Visibility.Collapsed;
+
             var recognitionResult = await RecognizeDialog.ShowDialogAsync(result.Symbol);
+
+            progressRing.Visibility = Visibility.Visible;
 
             if (recognitionResult == RecognitionResult.Right)
                 await perceptron.Calculate(imageStream.CloneStream(), result);
@@ -150,19 +156,29 @@ namespace HandwritingSymbolRecognition
                 await perceptron.Calculate(imageStream.CloneStream(), rightConfig);
             }
 
+            progressRing.Visibility = Visibility.Collapsed;
+
             ClearCanvas();
         }
 
         private async void OnTrainButtonClicked(object sender, RoutedEventArgs e)
         {
+            progressRing.Visibility = Visibility.Visible;
+
             InMemoryRandomAccessStream stream = new InMemoryRandomAccessStream();
 
             var file = await SaveDrawing();
             var imageStream = await imageProcessor.Process(file);
 
+            progressRing.Visibility = Visibility.Collapsed;
+
             var config = await TrainDialog.ShowDialogAsync();
 
+            progressRing.Visibility = Visibility.Visible;
+
             await perceptron.Calculate(imageStream, config);
+
+            progressRing.Visibility = Visibility.Collapsed;
 
             ClearCanvas();
         }

@@ -59,8 +59,7 @@ namespace HandwritingSymbolRecognition.Services
         public async Task<IRandomAccessStream> ConvertToBW(IRandomAccessStream imageStream, int width, int height)
         {
             WriteableBitmap bitmap = await BitmapFactory.New(width, height).FromStream(imageStream);
-
-            //bitmap.SetSource(imageStream);
+            
             bitmap = bitmap.Gray();
 
             InMemoryRandomAccessStream outputStream = new InMemoryRandomAccessStream();
@@ -136,7 +135,7 @@ namespace HandwritingSymbolRecognition.Services
                 }
             }
 
-            //Debug.WriteLine(cells.Count(x => x == 1), "QWERTY");
+            Debug.WriteLine(cells.Count(x => x == 1), "QWERTY");
             return cells;
         }
 

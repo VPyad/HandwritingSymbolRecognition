@@ -29,6 +29,7 @@
     <Grid x:Name="mainGrid">
         <canvas:CanvasControl Draw="DrawCanvas" ClearColor="White" x:Name="drawingCanvas"/>
         <InkCanvas x:Name="inkCanvas"/>
+        <ProgressRing x:Name="progressRing" Width="150" Height="150" VerticalAlignment="Center" IsActive="True" HorizontalAlignment="Center" Visibility="Collapsed"/>
         <InkToolbar TargetInkCanvas="{x:Bind inkCanvas}"
              VerticalAlignment="Bottom" x:Name="inkToolbar" InitialControls="None">
             <InkToolbarBallpointPenButton SelectedStrokeWidth="24"/>
