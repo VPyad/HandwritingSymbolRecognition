@@ -14,13 +14,14 @@ using Windows.Graphics.Imaging;
 using Windows.Storage;
 using Windows.Storage.Streams;
 using Windows.UI;
+using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Media.Imaging;
 
 namespace HandwritingSymbolRecognition.Services
 {
     public class ImageProcessor
     {
-        private const int MAGIC_COEFICIENT = 3;
+        private const int MAGIC_COEFICIENT = 5;
 
         private TrainSetConfig trainSetConfig;
 
@@ -33,7 +34,7 @@ namespace HandwritingSymbolRecognition.Services
         {
             var imageProps = await file.Properties.GetImagePropertiesAsync();
 
-            var resizedImageStream = await ResizeImageWithoutBitmap(await file.OpenReadAsync(), trainSetConfig.ImageWidth, trainSetConfig.ImageHeight);
+            var resizedImageStream = await ResizeImage(await file.OpenReadAsync(), (int)imageProps.Width, (int)imageProps.Height, trainSetConfig.ImageWidth, trainSetConfig.ImageHeight);
             //await SaveStreamToFile(resizedImageStream.CloneStream(), trainSetConfig.ImageWidth, trainSetConfig.ImageHeight, "resized");
 
             var wbImageStream = await ConvertToBW(resizedImageStream, trainSetConfig.ImageWidth, trainSetConfig.ImageHeight);
@@ -83,7 +84,7 @@ namespace HandwritingSymbolRecognition.Services
                 {
                     var color = bitmap.GetPixel(i, j);
 
-                    if (color.A == 255 && color.R != 255 && color.G != 255 && color.B != 255)
+                    if (color.A == 255 && color.R == 0 && color.G == 0 && color.B == 0) //if (color.A == 255 && color.R != 255 && color.G != 255 && color.B != 255)
                         pixels.Add(new Point(i, j), color);
                 }
             }
@@ -94,33 +95,57 @@ namespace HandwritingSymbolRecognition.Services
             var leftTop = new Point(pixels.Min(p => p.Key.X), pixels.Min(p => p.Key.Y));
             var rightBottom = new Point(pixels.Max(p => p.Key.X), pixels.Max(p => p.Key.Y));
 
-            WriteableBitmap boundBitmap = new WriteableBitmap((int)(rightBottom.X - leftTop.X + 1), (int)(rightBottom.Y - leftTop.Y + 1));
+            var boundBitmapWidth = (int)(rightBottom.X - leftTop.X + 1);
+            var boundBitmapHeight = (int)(rightBottom.Y - leftTop.Y + 1);
+
+            WriteableBitmap boundBitmap = new WriteableBitmap(boundBitmapWidth, boundBitmapHeight);
+            WhiteBitmap(boundBitmap);
 
             foreach (var pixel in pixels)
             {
-                boundBitmap.SetPixel((int)(pixel.Key.X - leftTop.X), (int)(pixel.Key.Y - leftTop.Y), pixel.Value);
+                int x = (int)(pixel.Key.X - leftTop.X);
+                int y = (int)(pixel.Key.Y - leftTop.Y);
+                Color color = pixel.Value;
+
+                boundBitmap.SetPixel(x, y, color);
             }
 
-            var stretchX = boundBitmap.PixelWidth / trainSetConfig.ImageWidth;
-            var stretchY = boundBitmap.PixelHeight / trainSetConfig.ImageHeight;
+            //await SaveBitmapToFile(boundBitmap, (int)(rightBottom.X - leftTop.X + 1), (int)(rightBottom.Y - leftTop.Y + 1), "boundBitmap");
 
-            WriteableBitmap stretchedBitmap = new WriteableBitmap(100, 100);
+            //var stretchX = boundBitmap.PixelWidth / (float)trainSetConfig.ImageWidth;
+            //var stretchY = boundBitmap.PixelHeight / (float)trainSetConfig.ImageHeight;
 
-            for (int i = 0; i < 100; i++)
+            int stretchedSize = 100;
+
+            var stretchedBitmap = boundBitmap.Resize(stretchedSize, stretchedSize, WriteableBitmapExtensions.Interpolation.Bilinear);
+
+            //WriteableBitmap stretchedBitmap = new WriteableBitmap(stretchedSize, stretchedSize);
+            //WhiteBitmap(stretchedBitmap);
+
+            //for (int i = 0; i < stretchedSize; i++)
+            //{
+            //    for (int j = 0; j < stretchedSize; j++)
+            //    {
+            //        int x = (int)(i * stretchX);
+            //        int y = (int)(j * stretchY);
+
+            //        var color = boundBitmap.GetPixel(x, y);
+
+            //        if (color != Colors.White)
+            //            Debug.WriteLine($"color: {color}");
+
+            //        stretchedBitmap.SetPixel(i, j, color);
+            //    }
+            //}
+
+            //await SaveBitmapToFile(stretchedBitmap, stretchedSize, stretchedSize, "stretchedBitmap");
+
+            for (int i = 0; i < stretchedBitmap.PixelWidth; i++) // stretchedBitmap
             {
-                for (int j = 0; j < 100; j++)
+                for (int j = 0; j < stretchedBitmap.PixelHeight; j++) // stretchedBitmap
                 {
-                    var color = boundBitmap.GetPixel(i * stretchX, j * stretchY);
-                    stretchedBitmap.SetPixel(i, j, color);
-                }
-            }
-
-            for (int i = 0; i < stretchedBitmap.PixelWidth; i++)
-            {
-                for (int j = 0; j < stretchedBitmap.PixelHeight; j++)
-                {
-                    var color = stretchedBitmap.GetPixel(i, j);
-                    if (color.A == 255 && color.R != 255 && color.G != 255 && color.B != 255)
+                    var color = stretchedBitmap.GetPixel(i, j); // stretchedBitmap
+                    if (color.A == 255 && color.R == 0 && color.G == 0 && color.B == 0) //if (color.A == 255 && color.R != 255 && color.G != 255 && color.B != 255)
                     {
                         cellValues[i / MAGIC_COEFICIENT * trainSetConfig.ImageWidth + j / MAGIC_COEFICIENT]++;
                     }
@@ -139,6 +164,17 @@ namespace HandwritingSymbolRecognition.Services
             return cells;
         }
 
+        private void WhiteBitmap(WriteableBitmap writeableBitmap)
+        {
+            for (int i = 0; i < writeableBitmap.PixelWidth; i++)
+            {
+                for (int j = 0; j < writeableBitmap.PixelHeight; j++)
+                {
+                    writeableBitmap.SetPixel(i, j, Colors.White);
+                }
+            }
+        }
+
         private async void InitConfig()
         {
             trainSetConfig = await TrainSetConfigHelper.ParseConfigJson();
@@ -152,7 +188,7 @@ namespace HandwritingSymbolRecognition.Services
 
             string name = string.IsNullOrEmpty(fileName) ? Guid.NewGuid().ToString() : fileName;
 
-            var stFile = await ApplicationData.Current.LocalFolder.CreateFileAsync(name + ".png", CreationCollisionOption.GenerateUniqueName);
+            var stFile = await ApplicationData.Current.LocalFolder.CreateFileAsync(name + ".png", CreationCollisionOption.ReplaceExisting);
             using (IRandomAccessStream stream = await stFile.OpenAsync(FileAccessMode.ReadWrite))
             {
                 BitmapEncoder encoder = await BitmapEncoder.CreateAsync(BitmapEncoder.PngEncoderId, stream);
@@ -170,6 +206,13 @@ namespace HandwritingSymbolRecognition.Services
             }
 
             Debug.WriteLine(stFile.Path);
+        }
+
+        private async Task SaveBitmapToFile(WriteableBitmap bitmap, int width, int height, string name)
+        {
+            InMemoryRandomAccessStream stream = new InMemoryRandomAccessStream();
+            await bitmap.ToStream(stream, BitmapEncoder.PngEncoderId);
+            await SaveStreamToFile(stream, width, height, name);
         }
 
         private async Task ResizeImageWithoutBitmap(StorageFile file, int width, int height)

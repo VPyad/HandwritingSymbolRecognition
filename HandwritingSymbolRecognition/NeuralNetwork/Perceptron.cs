@@ -4,6 +4,7 @@ using HandwritingSymbolRecognition.Services;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -57,6 +58,8 @@ namespace HandwritingSymbolRecognition.NeuralNetwork
             {
                 sum += cells[i - 1] * weights[i];
             }
+
+            Debug.WriteLine(sum, "sum in activanion function");
 
             result = sum >= 0 ? 1 : 0;
 
