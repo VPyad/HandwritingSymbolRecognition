@@ -29,7 +29,8 @@ namespace HandwritingSymbolRecognition.NeuralNetwork
         #endregion
 
         private const string MODEL_FILE_NAME = "model.json";
-        private const double WEAIGHT_INIT_COEFICIENT = .3;
+        private const double WEAIGHT_INIT_COEFICIENT = .5;
+        private const double LEARN_SPEED = .7;
 
         /// <summary>
         /// Default concturctor, load model from cache if exists
@@ -74,11 +75,11 @@ namespace HandwritingSymbolRecognition.NeuralNetwork
             await ProcessImageStream(imageStream);
 
             var delta = trainConfig.Value - result;
-            weights[0] = weights[0] + WEAIGHT_INIT_COEFICIENT * delta;
+            weights[0] = weights[0] + LEARN_SPEED * delta;
 
             for (int i = 1; i < cellsCount + 1; i++)
             {
-                weights[i] = weights[i] + WEAIGHT_INIT_COEFICIENT * delta * cells[i - 1];
+                weights[i] = weights[i] + LEARN_SPEED * delta * cells[i - 1];
             }
 
             await SaveModel();

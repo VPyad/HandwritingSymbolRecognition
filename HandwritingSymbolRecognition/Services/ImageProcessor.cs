@@ -21,7 +21,7 @@ namespace HandwritingSymbolRecognition.Services
 {
     public class ImageProcessor
     {
-        private const int MAGIC_COEFICIENT = 5;
+        private const int SPLIT_VALUE = 5;
 
         private TrainSetConfig trainSetConfig;
 
@@ -89,6 +89,8 @@ namespace HandwritingSymbolRecognition.Services
                 }
             }
 
+            Debug.WriteLine(pixels.Count, "Black pixels in image");
+
             if (pixels.Count == 0)
                 return null;
 
@@ -112,55 +114,33 @@ namespace HandwritingSymbolRecognition.Services
 
             //await SaveBitmapToFile(boundBitmap, (int)(rightBottom.X - leftTop.X + 1), (int)(rightBottom.Y - leftTop.Y + 1), "boundBitmap");
 
-            //var stretchX = boundBitmap.PixelWidth / (float)trainSetConfig.ImageWidth;
-            //var stretchY = boundBitmap.PixelHeight / (float)trainSetConfig.ImageHeight;
-
             int stretchedSize = 100;
 
             var stretchedBitmap = boundBitmap.Resize(stretchedSize, stretchedSize, WriteableBitmapExtensions.Interpolation.Bilinear);
 
-            //WriteableBitmap stretchedBitmap = new WriteableBitmap(stretchedSize, stretchedSize);
-            //WhiteBitmap(stretchedBitmap);
-
-            //for (int i = 0; i < stretchedSize; i++)
-            //{
-            //    for (int j = 0; j < stretchedSize; j++)
-            //    {
-            //        int x = (int)(i * stretchX);
-            //        int y = (int)(j * stretchY);
-
-            //        var color = boundBitmap.GetPixel(x, y);
-
-            //        if (color != Colors.White)
-            //            Debug.WriteLine($"color: {color}");
-
-            //        stretchedBitmap.SetPixel(i, j, color);
-            //    }
-            //}
-
             //await SaveBitmapToFile(stretchedBitmap, stretchedSize, stretchedSize, "stretchedBitmap");
 
-            for (int i = 0; i < stretchedBitmap.PixelWidth; i++) // stretchedBitmap
+            for (int i = 0; i < stretchedBitmap.PixelWidth; i++)
             {
-                for (int j = 0; j < stretchedBitmap.PixelHeight; j++) // stretchedBitmap
+                for (int j = 0; j < stretchedBitmap.PixelHeight; j++) 
                 {
-                    var color = stretchedBitmap.GetPixel(i, j); // stretchedBitmap
-                    if (color.A == 255 && color.R == 0 && color.G == 0 && color.B == 0) //if (color.A == 255 && color.R != 255 && color.G != 255 && color.B != 255)
+                    var color = stretchedBitmap.GetPixel(i, j);
+                    if (color.A == 255 && color.R == 0 && color.G == 0 && color.B == 0)
                     {
-                        cellValues[i / MAGIC_COEFICIENT * trainSetConfig.ImageWidth + j / MAGIC_COEFICIENT]++;
+                        cellValues[i / SPLIT_VALUE * trainSetConfig.ImageWidth + j / SPLIT_VALUE]++;
                     }
                 }
             }
 
             for (int i = 0; i < cellsCount; i++)
             {
-                if (cellValues[i] > MAGIC_COEFICIENT)
+                if (cellValues[i] > SPLIT_VALUE)
                 {
                     cells[i] = 1; 
                 }
             }
 
-            Debug.WriteLine(cells.Count(x => x == 1), "QWERTY");
+            Debug.WriteLine(cells.Count(x => x == 1), "Count of 1 in cells array");
             return cells;
         }
 
