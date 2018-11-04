@@ -33,14 +33,8 @@
             </StackPanel>
 
             <StackPanel Orientation="Vertical" Margin="10,5,10,0">
-                <TextBlock Text="Choose folder with image set for one or both symbols" Style="{StaticResource CaptionTextBlockStyle}"/>
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="each image should be" Style="{StaticResource CaptionTextBlockStyle}"/>
-                    <TextBlock x:Name="imageHTextBlock" Text=" 25" Style="{StaticResource CaptionTextBlockStyle}" FontWeight="Medium"/>
-                    <TextBlock Text=" x" Style="{StaticResource CaptionTextBlockStyle}"/>
-                    <TextBlock x:Name="imageWTextBlock" Text=" 25" Style="{StaticResource CaptionTextBlockStyle}" FontWeight="Medium"/>
-                    <TextBlock Text=" Click 'Train' button to start" Style="{StaticResource CaptionTextBlockStyle}"/>
-                </StackPanel>
+                <TextBlock Text="Choose folder with image set for one or both symbols." Style="{StaticResource CaptionTextBlockStyle}"/>
+                <TextBlock Text="Then Click 'Train' button to start" Style="{StaticResource CaptionTextBlockStyle}"/>
             </StackPanel>
 
             <StackPanel Orientation="Vertical" Margin="10,10,10,0">

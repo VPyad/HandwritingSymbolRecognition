@@ -38,5 +38,15 @@ namespace HandwritingSymbolRecognition.Helpers
 
             return config;
         }
+
+        public async static Task<TrainConfig> GetOppositTrainConfig(TrainConfig trainConfig)
+        {
+            var config = await ParseConfigJson();
+
+            if (config.Train1.Equals(trainConfig))
+                return config.Train2;
+            else
+                return config.Train1;
+        }
     }
 }

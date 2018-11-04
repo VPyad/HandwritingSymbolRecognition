@@ -1,4 +1,7 @@
-﻿using HandwritingSymbolRecognition.Helpers;
+﻿using HandwritingSymbolRecognition.Dialogs;
+using HandwritingSymbolRecognition.Helpers;
+using HandwritingSymbolRecognition.Models.TrainingSet;
+using HandwritingSymbolRecognition.NeuralNetwork;
 using HandwritingSymbolRecognition.Pages;
 using HandwritingSymbolRecognition.Services;
 using Microsoft.Graphics.Canvas;
@@ -17,6 +20,7 @@ using Windows.Graphics.Imaging;
 using Windows.Storage;
 using Windows.Storage.Streams;
 using Windows.UI.Input.Inking;
+using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -41,6 +45,9 @@ namespace HandwritingSymbolRecognition
         private IReadOnlyList<InkStroke> pendingDry;
         private InkPresenter inkPresenter;
 
+        ImageProcessor imageProcessor;
+        Perceptron perceptron;
+
         private int deferredDryDelay;
         #endregion
 
@@ -56,7 +63,11 @@ namespace HandwritingSymbolRecognition
         #region Events
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
-            //var inkPresenter = inkCanvas.InkPresenter;
+            ApplicationView.GetForCurrentView().TryResizeView(new Size(500, 355)); // for larger view size image recognition accuracy may drop
+
+            imageProcessor = new ImageProcessor();
+            perceptron = new Perceptron();
+
             inkPresenter = inkCanvas.InkPresenter;
 
             inkSynchronizer = inkPresenter.ActivateCustomDrying();
@@ -122,11 +133,54 @@ namespace HandwritingSymbolRecognition
 
         private async void OnRecognizedButtonClicked(object sender, RoutedEventArgs e)
         {
+            progressRing.Visibility = Visibility.Visible;
+
             InMemoryRandomAccessStream stream = new InMemoryRandomAccessStream();
-            ImageProcessor imageProcessor = new ImageProcessor();
 
             var file = await SaveDrawing();
-            await imageProcessor.Process(file);
+            var imageStream = await imageProcessor.Process(file);
+
+            TrainConfig result = await perceptron.Activation(imageStream);
+
+            progressRing.Visibility = Visibility.Collapsed;
+
+            var recognitionResult = await RecognizeDialog.ShowDialogAsync(result.Symbol);
+
+            progressRing.Visibility = Visibility.Visible;
+
+            if (recognitionResult == RecognitionResult.Right)
+                await perceptron.Calculate(imageStream.CloneStream(), result);
+            else
+            {
+                var rightConfig = await TrainSetConfigHelper.GetOppositTrainConfig(result);
+                await perceptron.Calculate(imageStream.CloneStream(), rightConfig);
+            }
+
+            progressRing.Visibility = Visibility.Collapsed;
+
+            ClearCanvas();
+        }
+
+        private async void OnTrainButtonClicked(object sender, RoutedEventArgs e)
+        {
+            progressRing.Visibility = Visibility.Visible;
+
+            InMemoryRandomAccessStream stream = new InMemoryRandomAccessStream();
+
+            var file = await SaveDrawing();
+            var imageStream = await imageProcessor.Process(file);
+
+            progressRing.Visibility = Visibility.Collapsed;
+
+            var config = await TrainDialog.ShowDialogAsync();
+
+            progressRing.Visibility = Visibility.Visible;
+
+            await perceptron.Calculate(imageStream, config);
+
+            progressRing.Visibility = Visibility.Collapsed;
+
+            ClearCanvas();
         }
 
         #endregion
@@ -156,8 +210,10 @@ namespace HandwritingSymbolRecognition
             drawingCanvas.Invalidate();
         }
 
-        private async Task<StorageFile> SaveDrawing()
+        private async Task<StorageFile> SaveDrawing(string fileName = null)
         {
+            fileName = string.IsNullOrEmpty(fileName) ? "user-input" : fileName;
+
             var displayInformation = DisplayInformation.GetForCurrentView();
             var imageSize = drawingCanvas.RenderSize;
 
@@ -169,7 +225,7 @@ namespace HandwritingSymbolRecognition
             await renderTargetBitmap.RenderAsync(drawingCanvas, Convert.ToInt32(imageSize.Width), Convert.ToInt32(imageSize.Height));
 
             var pixelBuffer = await renderTargetBitmap.GetPixelsAsync();
-            var file = await ApplicationData.Current.LocalFolder.CreateFileAsync("user-input.png", CreationCollisionOption.ReplaceExisting);
+            var file = await ApplicationData.Current.LocalFolder.CreateFileAsync(fileName + ".png", CreationCollisionOption.ReplaceExisting);
 
             using (var fileStream = await file.OpenAsync(FileAccessMode.ReadWrite))
             {
@@ -190,5 +246,11 @@ namespace HandwritingSymbolRecognition
             return file;
         }
         #endregion
+
+        private async void OnMagicButtonClicked(object sender, RoutedEventArgs e)
+        {
+            await SaveDrawing(Guid.NewGuid().ToString());
+            ClearCanvas();
+        }
     }
 }
